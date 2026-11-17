@@ -51,26 +51,31 @@ Refer to the [Companion Module Base Wiki](https://github.com/bitfocus/companion-
 
 ## Releasing
 
-1. **Bump the version** using npm's version command (this syncs `package.json` and `companion/manifest.json` automatically):
+1. **Write the changelog.** Add a `## vX.Y.Z` section to the top of `CHANGELOG.md` and commit it.
+
+2. **Bump the version.** This changes `package.json`, commits and creates the tag. `companion/manifest.json` keeps `0.0.0`, because the build writes the version.
    ```sh
    npm version patch  # or minor, or major
    ```
 
-2. **Push to your fork and create a PR:**
+3. **Push to your fork and create a PR:**
    ```sh
-   git push origin main
+   git push origin main --follow-tags
    ```
    Then open a PR to the [bitfocus repository](https://github.com/bitfocus/companion-module-stagetimerio-api).
 
-3. **After the PR is merged**, push the tag to the Bitfocus remote:
+4. **After the PR is merged**, push the tag to the Bitfocus remote and publish a GitHub release with the changelog section:
    ```sh
-   git push bitfocus --tags
+   git push bitfocus vX.Y.Z
+   awk '/^## vX.Y.Z/{f=1;next} f&&/^## /{exit} f' CHANGELOG.md > notes.md
+   gh release create vX.Y.Z -R bitfocus/companion-module-stagetimerio-api --notes-file notes.md
    ```
+   Publishing the release starts `.github/workflows/release.yaml`. It builds the module and attaches `stagetimerio-api-X.Y.Z.tgz` to the release. To build again, re-run the workflow in the Actions tab.
 
-4. **Submit via Developer Portal:**
+5. **Submit via Developer Portal:**
    - Go to the [Bitfocus Developer Portal](https://developer.bitfocus.io/) and log in with GitHub
    - Navigate to **My Connections** → select this module
    - Click **Submit Version** and choose the git tag you just pushed
    - Mark as prerelease if applicable, then submit for review
 
-5. **Review:** Community volunteers review submissions. Once approved, the new version becomes available to Companion users (v4.0.0+).
+6. **Review:** Community volunteers review submissions. Once approved, the new version becomes available to Companion users (v4.0.0+).
